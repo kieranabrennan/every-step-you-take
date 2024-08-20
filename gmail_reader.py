@@ -5,10 +5,10 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from credentials import set_credentials_env_var
 
 from google.cloud import storage
 import base64
-
 import logging
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly', 'https://www.googleapis.com/auth/gmail.modify']
@@ -20,9 +20,7 @@ class GmailReader:
         self.logger = logging.getLogger(self.__class__.__name__)
         self.logger.setLevel(logging.INFO)
         
-        if not os.getenv('FUNCTION_NAME'):
-            # This means the code is not running in a Google Cloud Function
-            os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "./google_service_account_credentials.json"
+        set_credentials_env_var()
 
         self.token_bucket_name = 'gmail_token_bucket'
         self.token_file_name = 'gmail_token.json'

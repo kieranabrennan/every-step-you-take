@@ -1,18 +1,18 @@
 import logging
-import os
 from google.cloud import firestore
 from datetime import datetime
 import pandas as pd
+from credentials import set_credentials_env_var
 
 DB_COLLECTION_NAME = "step_history"
 
 class FirestoreService:
 
     def __init__(self):
-        if not os.getenv('FUNCTION_NAME'):
-            # This means the code is not running in a Google Cloud Function
-            os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "./google_service_account_credentials.json"
-        
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger.setLevel(logging.INFO)
+
+        set_credentials_env_var()
         self.db = firestore.Client()
 
     def upload_dict(self, my_dict, field_name='value'):

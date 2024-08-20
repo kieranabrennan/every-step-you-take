@@ -1,5 +1,5 @@
 import logging
-from flask import Flask, request
+from flask import Flask
 from firestore_service import FirestoreService
 from step_count_plotter import StepCountPlotter
 from email_sender import EmailSender
@@ -10,7 +10,7 @@ import os
 app = Flask(__name__)
 
 @app.route('/run_steps_history_update', methods=['POST'])
-def run_steps_history_update():
+def run_steps_history_update(request=None):
     gmail_reader = GmailReader()
     firestore_service = FirestoreService()
     unread_email_list = gmail_reader.get_unread_emails()
@@ -26,7 +26,7 @@ def run_steps_history_update():
 
 
 @app.route('/run_steps_email_sender', methods=['POST'])
-def run_steps_email_sender():
+def run_steps_email_sender(request=None):
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
     
     firestore_service = FirestoreService()

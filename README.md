@@ -10,14 +10,14 @@
 - Subsequent authentication accesses this bucket, to refresh the token
 
 ## Set up Firestore
-- Enable API on project
+- Enable API in Google cloud project
 - Create service account, give roles for Firestore
     - Requires Cloud Datastore User, Firebase Admin SDK Administrator Service Agent, 
     Firebase Rules System, Firestore Service Agent, Cloud Storage for Firebase Admin
 - Create .json key and download
 
 - Create a Firestore database
-- Leave name as (default)
+  - Leave name as (default)
 
 ## Set up Email sender
 - In Gmail, setup an app password, password. 2FA needs to be enabled, then create at https://myaccount.google.com/apppasswords
@@ -26,10 +26,9 @@
 ## Cloud functions
 - Enable Cloud Functions, Cloud Build, Cloud Run
 
-
 - Run locally once to set up the gmail authentication token. This is then stored in the bucket
 
-
+Userful gcloud functions, handling accounts and projects
 - Check login with `glcoud auth list`
 - Change account with `gcloud config set account email_address`
 - Check the project with `gcloud config get-value project`
@@ -37,6 +36,15 @@
 - List all service accounts in project `gcloud iam service-accounts list`
 - Default service account should be: [PROJECT-ID]@appspot.gserviceaccount.com
 - Ensure default service account has necessary permissions 
+
+### Running locally
+- To have this working locally add with .env with:
+RUNNING_LOCALLY=True
+- Run
+`python3 main.py`
+`curl -X POST http://localhost:8080/run_steps_email_sender`
+
+### Pushing as a cloud function
 ```
 gcloud projects add-iam-policy-binding kieran-steps \
   --member="serviceAccount:kieran-steps@appspot.gserviceaccount.com" \
@@ -47,7 +55,7 @@ gcloud projects add-iam-policy-binding kieran-steps \
   --member="serviceAccount:kieran-steps@appspot.gserviceaccount.com" \
   --role="roles/cloudfunctions.invoker"
 ```
-
+- Create cloud function with:
 ```
 gcloud functions deploy run_steps_email_sender \
     --gen2 \
@@ -58,5 +66,9 @@ gcloud functions deploy run_steps_email_sender \
     --memory 512MB \
     --timeout 540s \
     --region us-central1 \
-    --set-env-vars GMAIL_APP_PASSWORD="$(grep GMAIL_APP_PASSWORD .env | cut -d '=' -f2)"
+    --set-env-vars GMAIL_APP_PASSWORD="$(sed -n 's/^GMAIL_APP_PASSWORD="\(.*\)"/\1/p' .env)"
+```
+- Run with
+```
+gcloud functions call run_steps_email_sender --region us-central1
 ```
