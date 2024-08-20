@@ -1,6 +1,9 @@
 from firestore_service import FirestoreService
 import logging
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')  # Use 'Agg' backend to avoid GUI issues
+
 import matplotlib.pyplot as plt
 
 class StepCountPlotter:
@@ -66,10 +69,10 @@ class StepCountPlotter:
                 return str(steps)
 
         # Set the title with colored text
-        title = (f'Week avg.: {format_steps(int(df_last_week['step_count'].mean()))} steps/day\n')
+        title = (f'Week avg.: {format_steps(int(df_last_week["step_count"].mean()))} steps/day\n')
 
         ax.set_title(f'{title}', loc='center', fontsize=10, color=solid_line_color, pad=10)
-        ax.text(0.5, 1.02, f'3-month avg: {format_steps(int(df_last_week['3m_avg'].mean()))} steps/day', 
+        ax.text(0.5, 1.02, f'3-month avg: {format_steps(int(df_last_week["3m_avg"].mean()))} steps/day', 
                     fontsize=10, color=dotted_line_color, ha='center', va='bottom', transform=plt.gca().transAxes)
 
         # Set labels
