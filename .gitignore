@@ -1,0 +1,4 @@
+venv/
+google_service_account_credentials.json
+oauth_credentials.json
+.env
