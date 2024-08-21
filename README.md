@@ -1,10 +1,19 @@
-## Set up Shortcuts on iPhone
+# Every Step You Take
+
+
+
+## Set up Automation on iPhone
+- Shortcut for iPhone (iPhone>Daily steps email.shortcut) reads step data from Health from the last day
+- Changes this to a list in form date, step_count (e.g. 2024-08-18, 12518)
+- Sends in the body of an email
+
+<img src="./img/iphone_automation.png" alt="iphone Automation" width="700">
 
 
 ## Set up Google Cloud platform
 - Enable Gmail API
 - Enable OAuth consent screen
-- Create Credentials for OAuth 2.0, download .json
+- Create Credentials for OAuth 2.0, download .json, save as oauth_credentials.json in local directory
 
 - Program authenticates through OAuth screen once. Stores token in Google Storage bucket
 - Subsequent authentication accesses this bucket, to refresh the token
@@ -27,7 +36,7 @@
 ## Cloud functions
 - Enable Cloud Functions, Cloud Build, Cloud Run
 
-- Run locally once to set up the gmail authentication token. This is then stored in the bucket
+- Run locally once to set up the gmail authentication token. This is then stored in the gcloud bucket automatically
 
 Userful gcloud functions, handling accounts and projects
 - Check login with `glcoud auth list`
@@ -51,17 +60,19 @@ RUNNING_LOCALLY=True
 `curl -X POST http://localhost:8080/run_steps_email_sender`
 
 ### Pushing as a cloud function
+- Ensure service account associated with project has required permissions:
 ```
-gcloud projects add-iam-policy-binding kieran-steps \
-  --member="serviceAccount:kieran-steps@appspot.gserviceaccount.com" \
+gcloud projects add-iam-policy-binding [PROJECT-ID] \
+  --member="serviceAccount:[PROJECT-ID]@appspot.gserviceaccount.com" \
   --role="roles/cloudfunctions.developer"
 ```
 ```
-gcloud projects add-iam-policy-binding kieran-steps \
-  --member="serviceAccount:kieran-steps@appspot.gserviceaccount.com" \
+gcloud projects add-iam-policy-binding [PROJECT-ID] \
+  --member="serviceAccount:[PROJECT-ID]@appspot.gserviceaccount.com" \
   --role="roles/cloudfunctions.invoker"
 ```
-- Create cloud function with:
+### Deploy cloud function
+History updater:
 ```
 gcloud functions deploy run_steps_history_updater \
     --gen2 \
@@ -73,7 +84,7 @@ gcloud functions deploy run_steps_history_updater \
     --timeout 540s \
     --region us-central1
 ```
-
+Email sender:
 ```
 gcloud functions deploy run_steps_email_sender \
     --gen2 \
@@ -93,4 +104,21 @@ gcloud functions call run_steps_history_updater --region us-central1
 
 ```
 gcloud functions call run_steps_email_sender --region us-central1
+```
+
+#### Schedule
+- Create cron job in Google Cloud Scheduler
+In Cloud Scheduler > Create 
+- For daily_steps_history_update, Frequency 5 0 * * * (00:05 every day)
+- For weekly_steps_email_sender, Frequency 0 5 * * 1 (05:00 every Monday)
+
+Target type HTTP
+URL: https://us-central1-[PROJECT-ID].cloudfunctions.net/run_steps_history_updater 
+HTTP method: POST
+Auth header: Add OIDC token
+Service account: App Engine default service account ([PROJECT-ID]@appspot@gserviceaccount.com)
+
+- Change the timeout with:
+```
+gcloud scheduler jobs update http weekly-metrics --attempt-deadline=600s
 ```

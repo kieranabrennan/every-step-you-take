@@ -1,5 +1,6 @@
 from firestore_service import FirestoreService
-from step_count_plotter import StepCountPlotter
+from step_summary_plotter import StepSummaryPlotter
+from step_history_processor import StepHistoryProcessor
 import matplotlib.pyplot as plt
 import numpy as np
 import smtplib
@@ -156,13 +157,17 @@ if __name__ == "__main__":
     firestore_service = FirestoreService()
     step_history_df = firestore_service.read_collection_to_dataframe()
 
-    step_count_plotter = StepCountPlotter(step_history_df)
-    fig_week_summary = step_count_plotter.plot_last_week_steps(display=False)
+    step_count_plotter = StepSummaryPlotter(step_history_df)
+
+    step_history_processor = StepHistoryProcessor(step_history_df)
+
+    step_count_plotter = StepSummaryPlotter(step_history_processor)
+    fig = step_count_plotter.create_summary_plot()
 
     to_email = "kbre93@gmail.com"
     from_email = "kieran.steps@gmail.com"
 
     email_sender = EmailSender(to_email, from_email)
     # email_sender.send_dummy_email()
-    email_sender.send_weekly_summary_email(fig_week_summary)
+    email_sender.send_weekly_summary_email(fig)
 

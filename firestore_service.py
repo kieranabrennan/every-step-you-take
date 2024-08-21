@@ -27,7 +27,7 @@ class FirestoreService:
     def read_collection_to_dataframe(self):
         '''
         Reads the step_history collection and outputs to dataframe
-        Columns of date and step_count
+        Columns of date (datetime64[ns]) and step_count (int)
         '''        
 
         docs = self.db.collection(DB_COLLECTION_NAME).stream()
