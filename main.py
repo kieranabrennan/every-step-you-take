@@ -9,24 +9,35 @@ import os
 
 app = Flask(__name__)
 
-@app.route('/run_steps_history_update', methods=['POST'])
-def run_steps_history_update(request=None):
+TO_EMAIL = "kbre93@gmail.com"
+FROM_EMAIL = "kieran.steps@gmail.com"
+
+@app.route('/run_steps_history_updater', methods=['POST'])
+def run_steps_history_updater(request=None): # Request arg needed for cloud, can't be a requirement for local run
+    ''' Reads all unread emails in steps email
+    Each new date, step count line to Firestore steps history
+    '''
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    logger = logging.getLogger(__name__)
     gmail_reader = GmailReader()
     firestore_service = FirestoreService()
     unread_email_list = gmail_reader.get_unread_emails()
     
-    for unread_email in unread_email_list:
+    for id, unread_email in enumerate(unread_email_list):
+        logger.info(f"Adding new steps history data to firestore ({id+1}/{len(unread_email_list)})")
         email_contents = gmail_reader.get_email_contents(unread_email['id'])
         steps_dict = parse_email_to_dict(email_contents)
-        
         firestore_service.upload_dict(steps_dict, field_name='step_count')
         gmail_reader.mark_email_as_read(unread_email['id'])
 
-    return "Steps history updated successfully", 200
+    return "Steps history updated successfully"
 
 
 @app.route('/run_steps_email_sender', methods=['POST'])
 def run_steps_email_sender(request=None):
+    ''' Reads step count history from Firestore, creates weekly summary fig
+    Sends figure over email
+    '''
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
     
     firestore_service = FirestoreService()
@@ -35,10 +46,7 @@ def run_steps_email_sender(request=None):
     step_count_plotter = StepCountPlotter(step_history_df)
     fig_week_summary = step_count_plotter.plot_last_week_steps(display=False)
 
-    to_email = "kbre93@gmail.com"
-    from_email = "kieran.steps@gmail.com"
-
-    email_sender = EmailSender(to_email, from_email)
+    email_sender = EmailSender(TO_EMAIL, FROM_EMAIL)
     email_sender.send_weekly_summary_email(fig_week_summary)
 
     return "Script executed successfully"

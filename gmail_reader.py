@@ -1,4 +1,3 @@
-import os
 import json
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -122,6 +121,7 @@ class GmailReader:
             list: A list of dictionaries, each containing 'id' and 'subject'.
         """
         try:
+            self.logger.info("Getting emails")
             service = build('gmail', 'v1', credentials=self.creds)
             results = service.users().messages().list(userId='me', labelIds=['INBOX'], q=query).execute()
             messages = results.get('messages', [])
@@ -146,6 +146,7 @@ class GmailReader:
         Returns:A dictionary containing 'id' and 'subject'.
         """
         try:
+            self.logger.info("Extracting email contents")
             msg = service.users().messages().get(userId='me', id=message_id).execute()
             email_data = msg['payload']['headers']
             subject = None

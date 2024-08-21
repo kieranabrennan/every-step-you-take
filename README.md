@@ -21,6 +21,7 @@
 
 ## Set up Email sender
 - In Gmail, setup an app password, password. 2FA needs to be enabled, then create at https://myaccount.google.com/apppasswords
+- Create a .env and add as GMAIL_APP_PASSWORD="app password"
 
 
 ## Cloud functions
@@ -37,11 +38,16 @@ Userful gcloud functions, handling accounts and projects
 - Default service account should be: [PROJECT-ID]@appspot.gserviceaccount.com
 - Ensure default service account has necessary permissions 
 
-### Running locally
+## Running locally
 - To have this working locally add with .env with:
 RUNNING_LOCALLY=True
-- Run
-`python3 main.py`
+
+- Run `python3 main.py` to start the flask server
+
+#### Steps History Updater
+`curl -X POST http://localhost:8080/run_steps_history_updater`
+
+#### Steps Email Sender
 `curl -X POST http://localhost:8080/run_steps_email_sender`
 
 ### Pushing as a cloud function
@@ -57,6 +63,18 @@ gcloud projects add-iam-policy-binding kieran-steps \
 ```
 - Create cloud function with:
 ```
+gcloud functions deploy run_steps_history_updater \
+    --gen2 \
+    --entry-point run_steps_history_updater \
+    --runtime python39 \
+    --trigger-http \
+    --allow-unauthenticated \
+    --memory 512MB \
+    --timeout 540s \
+    --region us-central1
+```
+
+```
 gcloud functions deploy run_steps_email_sender \
     --gen2 \
     --entry-point run_steps_email_sender \
@@ -69,6 +87,10 @@ gcloud functions deploy run_steps_email_sender \
     --set-env-vars GMAIL_APP_PASSWORD="$(sed -n 's/^GMAIL_APP_PASSWORD="\(.*\)"/\1/p' .env)"
 ```
 - Run with
+```
+gcloud functions call run_steps_history_updater --region us-central1
+```
+
 ```
 gcloud functions call run_steps_email_sender --region us-central1
 ```
