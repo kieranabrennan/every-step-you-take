@@ -1,6 +1,6 @@
 # Every Step You Take – Weekly Insights from Your iPhone Step Data
 
-I used a wearable to track my activity for a while, but ended up checking my scores in the app more than improving my routine. To focus on building consistency, I wanted to track my activity with the least noise – a single metric that doesn't need a wearable, step counting, and without the distraction of an extra app.
+I had a wearable to track my activity for a while, but ended up checking my scores in the app more than improving my routine. To focus on building consistency, I wanted to track my activity with the least noise – a single metric that doesn't need a wearable, step counting, and without the distraction of an extra app.
 
 With Every Step You Take, your iPhone step count data is compiled into a weekly report for you email inbox. By having to reflect on your step data regularly, small decisions to be more active become the default.
 
@@ -9,21 +9,23 @@ With Every Step You Take, your iPhone step count data is compiled into a weekly 
 </div>
 
 ## Features
-- Access your iPhone step data from Health, without a seperate app
-- Automatic insights to your inbox of your weekly step history
-- Step counting is simplest activity tracker, doesn't require wearables
+- Access your iPhone step data from Apple Health, without a seperate app
+- Get an automatic weekly report of your step count
+- Step counting is simplest was to track activity, and doesn't require a wearable
 - More steps per day = healthier lifestyle in the long run
 
 ## Setup
 There are three parts to the workflow:
 1. A Shortcut and Automation on iPhone to send step data over email
-2. A Cloud Function triggered daily (Cloud Scheduler) to upload daily step data to Firestore
+2. A Cloud Function triggered daily (Cloud Scheduler) to read emails and upload daily step data to Firestore
 3. A Cloud Function triggered weekly to summarise the step history and send an email
 
 ### Setup Shortcut and Automation (iPhone)
-- Upload the shortcut in iPhone>Daily steps email.shortcut to iPhone
+- Upload the shortcut in iPhone>Daily steps email.shortcut to your iPhone
+
 The iPhone shortcut reads step data from Health from the last day and sends as an email. Body in the form of date, step_count (e.g. 2024-08-18, 12518)
-Automations with email cannot run automatically on lock screen. Instead:
+
+Automations with email cannot run automatically on lock screen (!). The current workaround is to:
 - Set an automation to turn on aeroplane mode at 12 am each night
 - Set another automation to trigger the shortcut when aeroplane is turned off (i.e. in the morning when phone is checked)
 
@@ -38,9 +40,8 @@ To allow send access:
 - In Gmail, setup an app password, password. 2FA needs to be enabled, then create at https://myaccount.google.com/apppasswords
 - Create a .env in local directory and add as GMAIL_APP_PASSWORD="your app password"
 
-
 ### Create a Google Cloud project
-Note, the dedicated gmail doesn't need to be in the same workspace as the Google Cloud project. OAuth is used to authenticate gmail access
+Note, the dedicated gmail doesn't need to be in the same workspace as the Google Cloud project. OAuth is used for gmail access
 Enable API & Services for:
 - Gmail API - for reading emails and marking as read
 - Cloud storage - for storing token for gmail read access
@@ -65,6 +66,31 @@ Program authenticates through OAuth screen once. Stores token in Google Storage 
 
 - Create a Firestore database
   - Leave name as (default)
+
+#### Local setup
+```
+python -m venv venv
+source venv/bin/activate 
+pip install -r requirements.txt
+```
+Create .env with:
+```
+RUNNING_LOCALLY=True
+GMAIL_APP_PASSWORD="my app password"
+```
+Run this once to trigger OAuth workflow, which will save token for future runs
+```
+python gmail_reader.py
+```
+
+Directory should also have credentials ./oauth_credentials.json and ./google_service_account_credentials.json as above
+
+Update variables:
+```
+TO_EMAIL = your_personal_email@gmail.com # Personal email to receive summary
+FROM_EMAIL = your_steps_email@gmail.com # Email which receives step data, sends summary email
+```
+
 
 #### Deploy Cloud Functions
 Ensure service account associated with project has required permissions with:
@@ -128,16 +154,17 @@ Service account: App Engine default service account ([PROJECT-ID]@appspot@gservi
 ## Running
 
 ### Run locally
-- To have this working locally add with .env with:
-RUNNING_LOCALLY=True
-
-- Run `python3 main.py` to start the flask server
+Run `python main.py` to start the flask server
 
 #### Steps History Updater
-`curl -X POST http://localhost:8080/run_steps_history_updater`
+```
+curl -X POST http://localhost:8080/run_steps_history_updater
+```
 
 #### Steps Email Sender
-`curl -X POST http://localhost:8080/run_steps_email_sender`
+```
+curl -X POST http://localhost:8080/run_steps_email_sender
+```
 
 
 ### Run cloud function
