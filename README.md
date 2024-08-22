@@ -1,23 +1,24 @@
 # Every Step You Take – Weekly Insights from Your iPhone Step Data
 
-<img src="./img/preview.png" alt="Preview" align="left" width="250" style="margin-right: 20px;">
+I used a wearable to track my activity for a while, but ended up checking my scores in the app more than improving my routine. To focus on building consistency, I wanted to track my activity with the least noise – a single metric that doesn't need a wearable, step counting, and without the distraction of an extra app.
 
-Tracking your daily steps is a straightforward way to monitor your activity levels, but keeping an eye on your progress over time can be a hassle. This project automates the process, delivering a clear summary of your weekly step count directly to your inbox using data from your iPhone.
+With Every Step You Take, your iPhone step count data is compiled into a weekly report for you email inbox. By having to reflect on your step data regularly, small decisions to be more active become the default.
 
-With Every Step You Take, your step data is collected, analyzed, and compiled into a concise weekly report for your email inbox. This summary gives you a practical overview of your activity trends, helping you stay informed and make adjustments as needed to reach your fitness goals.
-
-<br clear="left"/>
+<div align="center">
+    <img src="./img/preview.png" alt="Preview" width="250">
+</div>
 
 ## Features
 - Access your iPhone step data from Health, without a seperate app
 - Automatic insights to your inbox of your weekly step history
 - Step counting is simplest activity tracker, doesn't require wearables
+- More steps per day = healthier lifestyle in the long run
 
 ## Setup
 There are three parts to the workflow:
 1. A Shortcut and Automation on iPhone to send step data over email
 2. A Cloud Function triggered daily (Cloud Scheduler) to upload daily step data to Firestore
-3. A Cloud Function triggered weekly to analyse the step history and send and email
+3. A Cloud Function triggered weekly to summarise the step history and send an email
 
 ### Setup Shortcut and Automation (iPhone)
 - Upload the shortcut in iPhone>Daily steps email.shortcut to iPhone
