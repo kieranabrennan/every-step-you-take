@@ -12,6 +12,9 @@ import logging
 import os
 from dotenv import load_dotenv
 
+TO_EMAIL = "kbre93@gmail.com"
+FROM_EMAIL = "kieran.steps@gmail.com"
+
 class EmailSender:
 
     def __init__(self, to_email, from_email):
@@ -164,10 +167,7 @@ if __name__ == "__main__":
     step_count_plotter = StepSummaryPlotter(step_history_processor)
     fig = step_count_plotter.create_summary_plot()
 
-    to_email = "kbre93@gmail.com"
-    from_email = "kieran.steps@gmail.com"
-
-    email_sender = EmailSender(to_email, from_email)
+    email_sender = EmailSender(TO_EMAIL, FROM_EMAIL)
     # email_sender.send_dummy_email()
     email_sender.send_weekly_summary_email(fig)
 
