@@ -152,7 +152,6 @@ class EmailSender:
             self.logger.error(f"Failed to send email: {str(e)}")
             return
 
-
 if __name__ == "__main__":
     
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

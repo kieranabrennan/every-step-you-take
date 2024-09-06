@@ -57,6 +57,7 @@ Enable API & Services for:
 - Download .json, save as oauth_credentials.json in local directory
 
 Program authenticates through OAuth screen once. Stores token in Google Storage bucket. Subsequent authentication accesses this bucket, to refresh the token. This means the program needs to be run once locally, to follow the Oauth workflow, before it will work as a cloud function
+Note: This token (including the ability to refresh) expires every 7 days when the Oauth consent screen is in Testing. Must be published
 
 #### Set up Firestore
 - Create service account, give roles for Firestore

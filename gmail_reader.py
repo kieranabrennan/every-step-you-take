@@ -43,6 +43,7 @@ class GmailReader:
             if not self.creds or not self.creds.valid:
                 if self.creds and self.creds.expired and self.creds.refresh_token:
                     try:
+                        self.logger.info("Attempting to refresh token")
                         self.creds.refresh(Request())
                     except Exception as e:
                         self.logger.error(f"Error refreshing token: {e}")
