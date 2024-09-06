@@ -27,9 +27,10 @@ def run_steps_history_updater(request=None): # Request arg needed for cloud, can
     for id, unread_email in enumerate(unread_email_list):
         logger.info(f"Adding new steps history data to firestore ({id+1}/{len(unread_email_list)})")
         email_contents = gmail_reader.get_email_contents(unread_email['id'])
-        steps_dict = parse_email_to_dict(email_contents)
-        firestore_service.upload_dict(steps_dict, field_name='step_count')
-        gmail_reader.mark_email_as_read(unread_email['id'])
+        if email_contents['subject'] == "Weekly steps report":
+            steps_dict = parse_email_to_dict(email_contents)
+            firestore_service.upload_dict(steps_dict, field_name='step_count')
+            gmail_reader.mark_email_as_read(unread_email['id'])
 
     return "Steps history updated successfully"
 

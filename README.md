@@ -176,3 +176,5 @@ gcloud functions call run_steps_history_updater --region us-central1
 gcloud functions call run_steps_email_sender --region us-central1
 ```
 
+## TODO:
+- Add a check for missing data in step history
