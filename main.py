@@ -46,12 +46,18 @@ def run_steps_email_sender(request=None):
     step_history_df = firestore_service.read_collection_to_dataframe()
 
     step_history_processor = StepHistoryProcessor(step_history_df)
+    step_history_processor = StepHistoryProcessor(step_history_df)
+    missing_days = step_history_processor.check_missing_dates()
+    if missing_days:
+        message = f"Note: Data missing for {' '.join(missing_days)}"
+    else:
+        message = ''
 
     step_count_plotter = StepSummaryPlotter(step_history_processor)
     fig_week_summary = step_count_plotter.create_summary_plot()
 
     email_sender = EmailSender(TO_EMAIL, FROM_EMAIL)
-    email_sender.send_weekly_summary_email(fig_week_summary)
+    email_sender.send_weekly_summary_email(fig_week_summary, message)
 
     return "Script executed successfully"
 

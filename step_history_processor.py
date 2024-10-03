@@ -12,6 +12,21 @@ class StepHistoryProcessor:
         
         self.step_history_df = step_history_df
 
+    def check_missing_dates(self):
+        ''' Returns dates where there is missing step history
+        '''
+        df = self.step_history_df.copy()
+        date_range = pd.date_range(start=df['date'].min(), end=df['date'].max(), freq='D')
+        all_dates = set(date_range.date)
+        step_dates = set(df['date'].dt.date)
+        missing_dates = all_dates - step_dates
+        missing_dates_str = [d.strftime('%Y-%m-%d') for d in missing_dates]
+        if missing_dates:
+            self.logger.warning(f'Missing days in step history: {missing_dates_str}')
+        
+        return missing_dates_str
+
+
     def _create_week_to_yesterday_df(self):
         ''' Returns a df with dates (2024-10-19 format) and day_of_week
         for a full week up to yesterday
@@ -104,6 +119,8 @@ if __name__ == "__main__":
     step_history_df = firestore_service.read_collection_to_dataframe()
 
     step_history_processor = StepHistoryProcessor(step_history_df)
+
+    step_history_processor.check_missing_dates()
 
     ytd_avg = step_history_processor.get_year_to_date_avg_step_count()
     print(f"Year to date average step count: {ytd_avg}")

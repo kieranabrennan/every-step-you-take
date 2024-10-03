@@ -130,11 +130,11 @@ class EmailSender:
             self.logger.error(f"Failed to send email: {str(e)}")
             return
         
-    def send_weekly_summary_email(self, fig):
+    def send_weekly_summary_email(self, fig, msg_txt=''):
         ''' Sends a weekly summary email
         '''
         subject = 'Your weekly step summary'
-        message_text = ''
+        message_text = msg_txt
 
         try:
             fig_bytes_buffer = self._create_bytes_buffer_from_fig(fig)
@@ -159,7 +159,14 @@ if __name__ == "__main__":
     firestore_service = FirestoreService()
     step_history_df = firestore_service.read_collection_to_dataframe()
 
-    step_count_plotter = StepSummaryPlotter(step_history_df)
+    step_history_processor = StepHistoryProcessor(step_history_df)
+    missing_days = step_history_processor.check_missing_dates()
+    if missing_days:
+        message = f"Note: Data missing for {' '.join(missing_days)}"
+    else:
+        message = ''
+
+    step_count_plotter = StepSummaryPlotter(step_history_processor)
 
     step_history_processor = StepHistoryProcessor(step_history_df)
 
@@ -168,5 +175,5 @@ if __name__ == "__main__":
 
     email_sender = EmailSender(TO_EMAIL, FROM_EMAIL)
     # email_sender.send_dummy_email()
-    email_sender.send_weekly_summary_email(fig)
+    email_sender.send_weekly_summary_email(fig, message)
 
