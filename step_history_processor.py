@@ -77,18 +77,19 @@ class StepHistoryProcessor:
         df_last_week = pd.merge(df_last_week, df_3m_by_weekday, how='left', on='day_of_week')
         return df_last_week.copy()
 
-    def filter_year_to_date(self):
-        ''' Return step_history df from one year ago
+    def filter_year_to_yesterday(self):
+        ''' Return step_history df from one year ago to yesterday
         '''
         df = self.step_history_df.copy()
         one_year_ago = pd.Timestamp.now() - pd.DateOffset(years=1)
-        df = df[df["date"] > one_year_ago]
+        yesterday = pd.Timestamp.now().normalize() - pd.DateOffset(days=1)
+        df = df[(df["date"] > one_year_ago) & (df["date"] <= yesterday)]
         return df
 
     def get_year_to_date_avg_step_count(self):
         ''' Average steps per day from one year ago
         '''
-        df = self.filter_year_to_date()
+        df = self.filter_year_to_yesterday()
         avg_step_count = int(df["step_count"].mean())
         return avg_step_count
 
@@ -96,7 +97,7 @@ class StepHistoryProcessor:
         '''
         Colums: week, step_count_avg
         '''
-        df = self.filter_year_to_date()
+        df = self.filter_year_to_yesterday()
         df['week'] = df['date'].dt.to_period('W')
         ytd_df = df.groupby('week')['step_count'].mean().astype(int).reset_index()
         ytd_df.rename(columns={"step_count":"step_count_avg"}, inplace=True)
@@ -104,7 +105,7 @@ class StepHistoryProcessor:
         return ytd_df
     
     def create_year_to_date_by_month(self):
-        df = self.filter_year_to_date()
+        df = self.filter_year_to_yesterday()
         df['week'] = df['date'].dt.to_period('M')
         ytd_df = df.groupby('week')['step_count'].mean().astype(int).reset_index()
         ytd_df.rename(columns={"step_count":"step_count_avg"}, inplace=True)
